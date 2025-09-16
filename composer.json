@@ -4,7 +4,7 @@
   "version": "0.1.0",
   "type": "wordpress-plugin",
   "minimum-stability": "stable",
-  "license": "proprietary",
+  "license": "GPL-3.0-or-later",
   "authors": [
     {
       "name": "Matt Maiorano",
@@ -12,6 +12,7 @@
     }
   ],
   "require": {
+    "php": ">=8.2",
     "symfony/cache": "^7.3"
   },
   "autoload": {
