@@ -1,0 +1,74 @@
+services:
+  wordpress:
+    build:
+      context: .
+      args:
+        PHP_VERSION: ${PHP_VERSION}
+    restart: unless-stopped
+    ports:
+      - "80"
+    environment:
+      WORDPRESS_DEBUG: 1
+      WORDPRESS_DB_HOST: ${COMPOSE_PROJECT_NAME}_mysql
+      WORDPRESS_DB_USER: ${MYSQL_USER}
+      WORDPRESS_DB_PASSWORD: ${MYSQL_PASSWORD}
+      WORDPRESS_DB_NAME: ${MYSQL_DATABASE}
+      WORDPRESS_CONFIG_EXTRA: |
+        define('WP_REDIS_DSN', 'redis://${COMPOSE_PROJECT_NAME}_redis:6379');
+      XDEBUG_CONFIG: "client_host=host.docker.internal start_with_request=1"
+      XDEBUG_MODE: "develop,debug,profile"
+    labels:
+      - "traefik.http.routers.${COMPOSE_PROJECT_NAME}.entrypoints=websecure"
+      - "traefik.http.routers.${COMPOSE_PROJECT_NAME}.rule=Host(`${SERVER_NAME}`)"
+      - "traefik.http.routers.${COMPOSE_PROJECT_NAME}.tls=true"
+      - "traefik.http.routers.${COMPOSE_PROJECT_NAME}-http.entrypoints=web"
+      - "traefik.http.routers.${COMPOSE_PROJECT_NAME}-http.rule=Host(`${SERVER_NAME}`)"
+      - "traefik.http.routers.${COMPOSE_PROJECT_NAME}-http.middlewares=${COMPOSE_PROJECT_NAME}-https"
+      - "traefik.http.middlewares.${COMPOSE_PROJECT_NAME}-https.redirectscheme.scheme=https"
+    volumes:
+      - ./object-cache.php:/var/www/html/wp-content/object-cache.php
+      - .:/var/www/html/wp-content/wp-symfony-cache
+    depends_on:
+      - mysql
+    networks:
+      default:
+        aliases:
+          - ${COMPOSE_PROJECT_NAME}_wordpress
+          - ${SERVER_NAME}
+  mysql:
+    image: mariadb:11
+    restart: unless-stopped
+    ports:
+      - "3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+    volumes:
+      - mysql:/var/lib/mysql
+    labels:
+      - "traefik.enable=false"
+    networks:
+      default:
+        aliases:
+          - ${COMPOSE_PROJECT_NAME}_mysql
+  redis:
+    image: redis:8
+    restart: unless-stopped
+    ports:
+      - "6379"
+    labels:
+      - "traefik.enable=false"
+    networks:
+      default:
+        aliases:
+          - ${COMPOSE_PROJECT_NAME}_redis
+
+volumes:
+  mysql:
+
+networks:
+  default:
+    name: traefik-network
+    external: true

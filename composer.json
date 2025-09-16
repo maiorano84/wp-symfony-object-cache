@@ -1,0 +1,22 @@
+{
+  "name": "maiorano84/wp-symfony-cache",
+  "description": "A Wordpress Object Cache using the Symfony Cache component",
+  "version": "0.1.0",
+  "type": "wordpress-plugin",
+  "minimum-stability": "stable",
+  "license": "proprietary",
+  "authors": [
+    {
+      "name": "Matt Maiorano",
+      "email": "maiorano84@gmail.com"
+    }
+  ],
+  "require": {
+    "symfony/cache": "^7.3"
+  },
+  "autoload": {
+    "psr-4": {
+      "Maiorano\\ObjectCache\\": "src"
+    }
+  }
+}

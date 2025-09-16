@@ -1,0 +1,10 @@
+services:
+  composer:
+    build:
+      context: .
+      args:
+        PHP_VERSION: ${PHP_VERSION}
+    working_dir: /app
+    entrypoint: [ "composer" ]
+    volumes:
+      - ./:/app
