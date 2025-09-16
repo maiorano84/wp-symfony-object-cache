@@ -29,6 +29,7 @@ interface CacheGroupAwareInterface
      * @return string
      */
     public function getGroupSeparator(): string;
+
     /**
      * @return string
      */

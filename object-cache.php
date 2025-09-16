@@ -11,7 +11,6 @@
  * Text Domain:       maiorano
  */
 
-use Maiorano\ObjectCache\WPObjectCacheAdapter;
 use Maiorano\ObjectCache\SymfonyCacheDecorator;
 use Symfony\Component\Cache\Adapter\RedisAdapter;
 

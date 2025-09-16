@@ -4,19 +4,35 @@ namespace Maiorano\ObjectCache;
 
 use Closure;
 use Psr\Cache\CacheItemInterface;
-use Symfony\Component\Cache\CacheItem;
-use WP_Object_Cache as WPObjectCache;
 use Symfony\Component\Cache\Adapter\AdapterInterface;
+use Symfony\Component\Cache\CacheItem;
 use Symfony\Contracts\Cache\CacheInterface;
 use Symfony\Contracts\Cache\ItemInterface;
+use WP_Object_Cache as WPObjectCache;
 
+/**
+ * A class that wraps a WP_Object_Cache instance to work with PSR-6 interfaces.
+ * @package Maiorano\ObjectCache
+ */
 class WPObjectCacheAdapter implements CacheInterface, AdapterInterface, CacheGroupAwareInterface
 {
-    private WPObjectCache $cache;
+    /**
+     * @var Closure
+     */
     private static Closure $itemFactory;
+
+    /**
+     * @var WPObjectCache
+     */
+    private WPObjectCache $cache;
+
+    /**
+     * @param WPObjectCache $cache
+     */
     public function __construct(
         WPObjectCache $cache,
-    ) {
+    )
+    {
         $this->cache = $cache;
         self::$itemFactory = Closure::bind(static function ($key, $value, $isHit, $group) {
             $item = new CacheItem();
@@ -29,6 +45,21 @@ class WPObjectCacheAdapter implements CacheInterface, AdapterInterface, CacheGro
         }, null, CacheItem::class);
     }
 
+    /**
+     * @param array $keys
+     * @return iterable
+     */
+    public function getItems(array $keys = []): iterable
+    {
+        foreach ($keys as $key) {
+            yield $this->getItem($key);
+        }
+    }
+
+    /**
+     * @param mixed $key
+     * @return CacheItem
+     */
     public function getItem(mixed $key): CacheItem
     {
         $found = false;
@@ -37,21 +68,21 @@ class WPObjectCacheAdapter implements CacheInterface, AdapterInterface, CacheGro
         return (self::$itemFactory)($key, $value, $found, $group);
     }
 
-    public function getItems(array $keys = []): iterable
+    /**
+     * @return string
+     */
+    public function getGroupSeparator(): string
     {
-        foreach ($keys as $key) {
-            yield $this->getItem($key);
-        }
+        return CacheGroupAwareInterface::DEFAULT_GROUP_SEPARATOR;
     }
 
-    public function clear(string $prefix = ''): bool
-    {
-        if($prefix) {
-            return $this->cache->flush_group($prefix);
-        }
-        return $this->cache->flush();
-    }
-
+    /**
+     * @param string $key
+     * @param callable $callback
+     * @param float|null $beta
+     * @param array|null $metadata
+     * @return mixed
+     */
     public function get(string $key, callable $callback, ?float $beta = null, ?array &$metadata = null): mixed
     {
         $item = $this->getItem($key);
@@ -66,37 +97,10 @@ class WPObjectCacheAdapter implements CacheInterface, AdapterInterface, CacheGro
         return $item->get();
     }
 
-    public function delete(string $key): bool
-    {
-        return $this->deleteItem($key);
-    }
-
-    public function hasItem(string $key): bool
-    {
-        return $this->getItem($key)->isHit();
-    }
-
-    public function deleteItem(string $key): bool
-    {
-        if($this->hasItem($key)) {
-            $item = $this->getItem($key);
-            $meta = $item->getMetadata();
-            $this->cache->delete($item->getKey(), $meta['group']);
-        }
-        return false;
-    }
-
-    public function deleteItems(array $keys): bool
-    {
-        $success = true;
-        foreach ($keys as $key) {
-            if (!$this->deleteItem($key)) {
-                $success = false;
-            }
-        }
-        return $success;
-    }
-
+    /**
+     * @param CacheItemInterface $item
+     * @return bool
+     */
     public function save(CacheItemInterface $item): bool
     {
         $meta = $item->getMetadata();
@@ -108,36 +112,112 @@ class WPObjectCacheAdapter implements CacheInterface, AdapterInterface, CacheGro
         );
     }
 
+    /**
+     * @param string $prefix
+     * @return bool
+     */
+    public function clear(string $prefix = ''): bool
+    {
+        if ($prefix) {
+            return $this->cache->flush_group($prefix);
+        }
+        return $this->cache->flush();
+    }
+
+    /**
+     * @param string $key
+     * @return bool
+     */
+    public function delete(string $key): bool
+    {
+        return $this->deleteItem($key);
+    }
+
+    /**
+     * @param string $key
+     * @return bool
+     */
+    public function deleteItem(string $key): bool
+    {
+        if ($this->hasItem($key)) {
+            $item = $this->getItem($key);
+            $meta = $item->getMetadata();
+            $this->cache->delete($item->getKey(), $meta['group']);
+        }
+        return false;
+    }
+
+    /**
+     * @param string $key
+     * @return bool
+     */
+    public function hasItem(string $key): bool
+    {
+        return $this->getItem($key)->isHit();
+    }
+
+    /**
+     * @param array $keys
+     * @return bool
+     */
+    public function deleteItems(array $keys): bool
+    {
+        $success = true;
+        foreach ($keys as $key) {
+            if (!$this->deleteItem($key)) {
+                $success = false;
+            }
+        }
+        return $success;
+    }
+
+    /**
+     * @param CacheItemInterface $item
+     * @return bool
+     */
     public function saveDeferred(CacheItemInterface $item): bool
     {
         return $this->save($item);
     }
 
+    /**
+     * @return bool
+     */
     public function commit(): bool
     {
         return true;
     }
 
+    /**
+     * @param array $groups
+     * @return void
+     */
     public function addGlobalGroups(array $groups): void
     {
         $this->cache->add_global_groups($groups);
     }
 
+    /**
+     * @param array $groups
+     * @return void
+     */
     public function addNonPersistentGroups(array $groups): void
     {
         // Does nothing, WP_Object_Cache does not support non-persistent groups.
     }
 
+    /**
+     * @param int $blog_id
+     * @return void
+     */
     public function switchToBlog(int $blog_id): void
     {
         $this->cache->switch_to_blog($blog_id);
     }
 
-    public function getGroupSeparator(): string
-    {
-        return CacheGroupAwareInterface::DEFAULT_GROUP_SEPARATOR;
-    }
-
+    /**
+     * @return string
+     */
     public function getKeySeparator(): string
     {
         return CacheGroupAwareInterface::DEFAULT_KEY_SEPARATOR;
