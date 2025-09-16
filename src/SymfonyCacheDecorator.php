@@ -12,7 +12,7 @@ use Symfony\Contracts\Cache\ItemInterface;
  * A class that wraps a Symfony Cache Adapter to work with WordPress caching functions.
  * @package Maiorano\ObjectCache
  */
-class SymfonyCacheDecorator implements WPCacheInterface, CacheGroupAwareInterface
+final class SymfonyCacheDecorator implements WPCacheInterface
 {
     /**
      * @var AdapterInterface

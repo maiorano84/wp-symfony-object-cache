@@ -4,8 +4,8 @@ namespace Maiorano\ObjectCache;
 
 interface CacheGroupAwareInterface
 {
-    public const string DEFAULT_KEY_SEPARATOR = '--';
-    public const string DEFAULT_GROUP_SEPARATOR = '__';
+    public const DEFAULT_KEY_SEPARATOR = '--';
+    public const DEFAULT_GROUP_SEPARATOR = '__';
 
     /**
      * @param array $groups

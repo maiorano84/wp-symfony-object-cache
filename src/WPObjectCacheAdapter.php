@@ -14,7 +14,7 @@ use WP_Object_Cache as WPObjectCache;
  * A class that wraps a WP_Object_Cache instance to work with PSR-6 interfaces.
  * @package Maiorano\ObjectCache
  */
-class WPObjectCacheAdapter implements CacheInterface, AdapterInterface, CacheGroupAwareInterface
+final class WPObjectCacheAdapter implements CacheInterface, AdapterInterface, CacheGroupAwareInterface
 {
     /**
      * @var Closure

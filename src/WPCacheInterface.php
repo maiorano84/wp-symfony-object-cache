@@ -2,7 +2,7 @@
 
 namespace Maiorano\ObjectCache;
 
-interface WPCacheInterface
+interface WPCacheInterface extends CacheGroupAwareInterface
 {
     /**
      * @param int|string $key
