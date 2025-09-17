@@ -1,6 +1,6 @@
 <?php
 /*
- * Plugin Name:       WordPress Symfony Object Cache
+ * Plugin Name:       WordPress Symfony Object Cache Drop-In
  * Description:       An Object Cache using the Symfony Cache component.
  * Version:           0.1
  * Requires PHP:      8.2
@@ -15,7 +15,7 @@ use Maiorano\ObjectCache\CacheGroupAwareInterface;
 use Maiorano\ObjectCache\WPCacheInterface;
 use Maiorano\ObjectCache\WPSymfonyCacheFactory;
 
-defined('\\ABSPATH') || exit;
+defined('ABSPATH') || exit;
 
 /**
  * Object Cache API
@@ -24,7 +24,7 @@ defined('\\ABSPATH') || exit;
  *
  * @package Maiorano\ObjectCache
  */
-require_once __DIR__ . '/wp-symfony-cache/vendor/autoload.php';
+require_once WP_CONTENT_DIR . '/plugins/wp-symfony-cache/vendor/autoload.php';
 WPSymfonyCacheFactory::autoload();
 
 /**
