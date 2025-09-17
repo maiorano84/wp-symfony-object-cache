@@ -452,5 +452,5 @@ function wp_cache_reset()
 {
     _deprecated_function(__FUNCTION__, '3.5.0', 'wp_cache_switch_to_blog()');
 
-    flush();
+    wp_cache_flush();
 }

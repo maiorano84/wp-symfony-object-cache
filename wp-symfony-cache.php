@@ -19,6 +19,7 @@ register_activation_hook( __FILE__, function() {
             $sys->move($dropinPath, $dropinPath . '.bak');
         }
         $sys->copy( __DIR__ . '/dropin/object-cache.php', $dropinPath, true, FS_CHMOD_FILE );
+        wp_cache_flush();
     }
 } );
 
@@ -32,6 +33,7 @@ register_deactivation_hook( __FILE__, function() {
         if($sys->exists($dropinPath . '.bak')) {
             $sys->move($dropinPath . '.bak', $dropinPath);
         }
+        wp_cache_flush();
     }
 } );
 
