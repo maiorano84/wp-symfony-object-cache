@@ -267,10 +267,10 @@ final class SymfonyCacheDecorator implements WPCacheInterface
     }
 
     /**
-     * @param array $groups
+     * @param string|string[] $groups
      * @return void
      */
-    public function addGlobalGroups(array $groups): void
+    public function addGlobalGroups(string|array $groups): void
     {
         if ($this->adapter instanceof CacheGroupAwareInterface) {
             $this->adapter->addGlobalGroups($groups);
@@ -278,10 +278,10 @@ final class SymfonyCacheDecorator implements WPCacheInterface
     }
 
     /**
-     * @param array $groups
+     * @param string|string[] $groups
      * @return void
      */
-    public function addNonPersistentGroups(array $groups): void
+    public function addNonPersistentGroups(string|array $groups): void
     {
         if ($this->adapter instanceof CacheGroupAwareInterface) {
             $this->adapter->addNonPersistentGroups($groups);

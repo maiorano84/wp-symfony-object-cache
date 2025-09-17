@@ -8,16 +8,16 @@ interface CacheGroupAwareInterface
     public const DEFAULT_GROUP_SEPARATOR = '__';
 
     /**
-     * @param array $groups
+     * @param string|string[] $groups
      * @return void
      */
-    public function addGlobalGroups(array $groups): void;
+    public function addGlobalGroups(string|array $groups): void;
 
     /**
-     * @param array $groups
+     * @param string|string[] $groups
      * @return void
      */
-    public function addNonPersistentGroups(array $groups): void;
+    public function addNonPersistentGroups(string|array $groups): void;
 
     /**
      * @param int $blog_id

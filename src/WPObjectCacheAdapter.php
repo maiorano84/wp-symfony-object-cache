@@ -189,19 +189,19 @@ final class WPObjectCacheAdapter implements CacheInterface, AdapterInterface, Ca
     }
 
     /**
-     * @param array $groups
+     * @param string|string[] $groups
      * @return void
      */
-    public function addGlobalGroups(array $groups): void
+    public function addGlobalGroups(string|array $groups): void
     {
         $this->cache->add_global_groups($groups);
     }
 
     /**
-     * @param array $groups
+     * @param string|string[] $groups
      * @return void
      */
-    public function addNonPersistentGroups(array $groups): void
+    public function addNonPersistentGroups(string|array $groups): void
     {
         // Does nothing, WP_Object_Cache does not support non-persistent groups.
     }
