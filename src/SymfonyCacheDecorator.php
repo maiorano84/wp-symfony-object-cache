@@ -5,6 +5,7 @@ namespace Maiorano\ObjectCache;
 use Generator;
 use InvalidArgumentException;
 use Symfony\Component\Cache\Adapter\AdapterInterface;
+use Symfony\Component\Cache\Adapter\TagAwareAdapterInterface;
 use Symfony\Component\Cache\CacheItem;
 use Symfony\Contracts\Cache\ItemInterface;
 
@@ -18,13 +19,19 @@ final class SymfonyCacheDecorator implements WPCacheInterface
      * @var AdapterInterface
      */
     private AdapterInterface $adapter;
+    /**
+     * @var string
+     */
+    private string $namespace;
 
     /**
      * @param AdapterInterface $cache
+     * @param string $namespace
      */
-    public function __construct(AdapterInterface $cache)
+    public function __construct(AdapterInterface $cache, string $namespace)
     {
         $this->adapter = $cache;
+        $this->namespace = $namespace;
     }
 
     /**
@@ -32,7 +39,6 @@ final class SymfonyCacheDecorator implements WPCacheInterface
      * @param string $group
      * @param int $expire
      * @return Generator
-     * @throws \Psr\Cache\InvalidArgumentException
      */
     public function addMultiple(array $data, string $group = '', int $expire = 0): Generator
     {
@@ -47,7 +53,6 @@ final class SymfonyCacheDecorator implements WPCacheInterface
      * @param string $group
      * @param int $expire
      * @return bool
-     * @throws \Psr\Cache\InvalidArgumentException
      */
     public function add(int|string $key, mixed $data, string $group = '', int $expire = 0): bool
     {
@@ -102,7 +107,6 @@ final class SymfonyCacheDecorator implements WPCacheInterface
      * @param string $group
      * @param int $expire
      * @return bool
-     * @throws \Psr\Cache\InvalidArgumentException
      */
     public function set(int|string $key, mixed $data, string $group = '', int $expire = 0): bool
     {
@@ -112,6 +116,11 @@ final class SymfonyCacheDecorator implements WPCacheInterface
         if ($expire > 0) {
             $item->expiresAfter($expire);
         }
+
+        if($this->adapter instanceof TagAwareAdapterInterface){
+            $item->tag([$group ?: 'default', $this->namespace]);
+        }
+
         return $this->adapter->save($item);
     }
 
@@ -121,7 +130,6 @@ final class SymfonyCacheDecorator implements WPCacheInterface
      * @param string $group
      * @param int $expire
      * @return bool
-     * @throws \Psr\Cache\InvalidArgumentException
      */
     public function replace(int|string $key, mixed $data, string $group = '', int $expire = 0): bool
     {
@@ -137,7 +145,6 @@ final class SymfonyCacheDecorator implements WPCacheInterface
      * @param string $group
      * @param int $expire
      * @return Generator
-     * @throws \Psr\Cache\InvalidArgumentException
      */
     public function setMultiple(array $data, string $group = '', int $expire = 0): Generator
     {
@@ -151,7 +158,6 @@ final class SymfonyCacheDecorator implements WPCacheInterface
      * @param string $group
      * @param bool $force
      * @return Generator
-     * @throws \Psr\Cache\InvalidArgumentException
      */
     public function getMultiple(array $keys, string $group = '', bool $force = false): Generator
     {
@@ -166,7 +172,6 @@ final class SymfonyCacheDecorator implements WPCacheInterface
      * @param bool $force
      * @param bool|null $found
      * @return mixed
-     * @throws \Psr\Cache\InvalidArgumentException
      */
     public function get(int|string $key, string $group = '', bool $force = false, bool &$found = null): mixed
     {
@@ -181,7 +186,6 @@ final class SymfonyCacheDecorator implements WPCacheInterface
      * @param array $keys
      * @param string $group
      * @return Generator
-     * @throws \Psr\Cache\InvalidArgumentException
      */
     public function deleteMultiple(array $keys, string $group = ''): Generator
     {
@@ -194,7 +198,6 @@ final class SymfonyCacheDecorator implements WPCacheInterface
      * @param int|string $key
      * @param string $group
      * @return bool
-     * @throws \Psr\Cache\InvalidArgumentException
      */
     public function delete(int|string $key, string $group = ''): bool
     {
@@ -206,7 +209,6 @@ final class SymfonyCacheDecorator implements WPCacheInterface
      * @param int $offset
      * @param string $group
      * @return int|false
-     * @throws \Psr\Cache\InvalidArgumentException
      */
     public function incr(int|string $key, int $offset = 1, string $group = ''): int|false
     {
@@ -226,7 +228,6 @@ final class SymfonyCacheDecorator implements WPCacheInterface
      * @param int $offset
      * @param string $group
      * @return int|false
-     * @throws \Psr\Cache\InvalidArgumentException
      */
     public function decr(int|string $key, int $offset = 1, string $group = ''): int|false
     {
@@ -246,6 +247,9 @@ final class SymfonyCacheDecorator implements WPCacheInterface
      */
     public function flush(): bool
     {
+        if ($this->adapter instanceof TagAwareAdapterInterface) {
+            return $this->adapter->invalidateTags([$this->namespace]);
+        }
         return $this->adapter->clear();
     }
 
@@ -255,6 +259,9 @@ final class SymfonyCacheDecorator implements WPCacheInterface
      */
     public function flushGroup(string $group): bool
     {
+        if ($this->adapter instanceof TagAwareAdapterInterface) {
+            return $this->adapter->invalidateTags([$group]);
+        }
         return $this->adapter->clear($group);
     }
 
