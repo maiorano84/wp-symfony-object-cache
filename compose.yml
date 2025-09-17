@@ -26,8 +26,7 @@ services:
       - "traefik.http.routers.${COMPOSE_PROJECT_NAME}-http.middlewares=${COMPOSE_PROJECT_NAME}-https"
       - "traefik.http.middlewares.${COMPOSE_PROJECT_NAME}-https.redirectscheme.scheme=https"
     volumes:
-      - ./object-cache.php:/var/www/html/wp-content/object-cache.php
-      - .:/var/www/html/wp-content/wp-symfony-cache
+      - .:/var/www/html/wp-content/plugins/wp-symfony-cache
     depends_on:
       - mysql
     networks:
